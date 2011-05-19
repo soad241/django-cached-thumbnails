@@ -70,7 +70,7 @@ class CachedThumbnailNode(ThumbnailNode):
 
         # first try to get the thumbnail url from cache, if it is available
         # just return it otherwise create the thumb
-        if isinstance(source, str):
+        if isinstance(source, basestring):
             relname = source
         elif isinstance(source, FieldFile):
             relname = source.name
@@ -85,13 +85,10 @@ class CachedThumbnailNode(ThumbnailNode):
         cache_key = escape(cache_key).replace(" ", "_").replace("(", "").\
                     replace(")", "").replace(",","")
         cache_key = str(hash(cache_key))
-        thumb_url = cache.get(cache_key)
+        thumb_url = False
         if thumb_url:
-            if self.context_name is None:
+            if not self.context_name:
                 return thumb_url
-            else:
-                context[self.context_name] = thumb_url
-                return ''
         # if the thumb is not cached create one and cache it
         try:
             thumbnail = get_thumbnailer(source).get_thumbnail(opts)
@@ -99,7 +96,7 @@ class CachedThumbnailNode(ThumbnailNode):
             if raise_errors:
                 raise
             result = self.bail_out(context)
-            cache.set(cache_key, result, TIMEOUT_CACHE)
+            #cache.set(cache_key, result, TIMEOUT_CACHE)
             return result
         # Return the thumbnail file url, or put the file on the context.
         if self.context_name is None:
@@ -108,7 +105,6 @@ class CachedThumbnailNode(ThumbnailNode):
             return result
         else:
             context[self.context_name] = thumbnail
-            cache.set(cache_key, thumbnail, TIMEOUT_CACHE)
             return ''
 
 
